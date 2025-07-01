@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy package files and install dependencies
 COPY package.json ./
 COPY package-lock.json ./
-RUN npm install
+RUN npm install --ignore-scripts
 
 # Copy the entire project and build it
 COPY . .
@@ -22,6 +22,10 @@ COPY --from=builder /app/build /usr/share/nginx/html
 # Remove default nginx config and add your own
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d
+
+# ✅ Add non-root user and switch to it
+RUN adduser -D appuser
+USER appuser
 
 # Expose port 80
 EXPOSE 80
