@@ -1,15 +1,12 @@
 # Step 1: Build the React App
 FROM node:18 AS builder
 
-# Set working directory inside container
 WORKDIR /app
 
-# Copy package files and install dependencies
 COPY package.json ./
 COPY package-lock.json ./
 RUN npm install --ignore-scripts
 
-# Copy the entire project and build it
 COPY . .
 RUN npm run build
 
@@ -23,13 +20,12 @@ COPY --from=builder /app/build /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d
 
-# ✅ Add non-root user and switch to it
-RUN adduser -D appuser
+# ✅ Add non-root user and fix permissions
+RUN adduser -D appuser \
+    && chown -R appuser:appuser /var/cache/nginx /var/run /var/log/nginx
+
 USER appuser
 
-# Expose port 80
 EXPOSE 80
 
-# Start nginx server
-CMD ["nginx", "-g", "daemon off;"] 
-# dockerfile
+CMD ["nginx", "-g", "daemon off;"]
